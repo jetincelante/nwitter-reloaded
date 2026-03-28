@@ -11,7 +11,7 @@ const router = createBrowserRouter([
   {
     // Layout -> login 사용자만 들어감
     // layout.tsx의 <h2>layout</h2> -> navigaion바로 바꿀것 
-    // why? home, profile페이지에 렌더링 하려고, (login,create-account에는 안씀)
+    // why? home, profile페이지에 렌더링 하려고 (login,create-account에는 안씀)
     path: "/",
     element: <Layout />,
     children: [
