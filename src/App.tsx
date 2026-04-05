@@ -1,11 +1,14 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Router, RouterProvider } from "react-router-dom";
 import Layout from "./components/layout";
 import Home from "./routes/home";
 import Profile from "./routes/profile";
 import Login from "./routes/login";
 import CreateAccount from "./routes/create-account";
-import { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
+import { useEffect, useState } from "react";
+import LoadingScreen from "./components/loading-screen";
+import { auth } from "./firebase";
 
 const router = createBrowserRouter([
   {
@@ -50,13 +53,30 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
+const Wrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+`;
+
 
 function App() {
+  // firebase가 유저 체크하는 동안 띄울 로딩화면
+  const [isLoading, setLoading] = useState(true);
+  const init = async() => {
+    await auth.authStateReady();
+    // authStateReady() -> firebase가 유저 체크하는 동안 기다림
+    setLoading(false);
+  };
+  useEffect(() => {
+    init();
+  }, []);
   return (
-  <>
+  <Wrapper>
     <GlobalStyles />
-    <RouterProvider router={router} />
-  </>
+    {isLoading ? <LoadingScreen /> : <RouterProvider router ={router} />} 
+    {/* isLoading true -> <LoadingScreen /> 실행, false -> <RouterProvider /> */}
+  </Wrapper>
   );
 }
 
