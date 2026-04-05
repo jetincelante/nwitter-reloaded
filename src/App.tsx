@@ -9,6 +9,7 @@ import reset from "styled-reset";
 import { useEffect, useState } from "react";
 import LoadingScreen from "./components/loading-screen";
 import { auth } from "./firebase";
+import ProtectedRoute from "./components/protected-route";
 
 const router = createBrowserRouter([
   {
@@ -16,18 +17,22 @@ const router = createBrowserRouter([
     // layout.tsx의 <h2>layout</h2> -> navigaion바로 바꿀것 
     // why? home, profile페이지에 렌더링 하려고 (login,create-account에는 안씀)
     path: "/",
-    element: <Layout />,
+    element: (<ProtectedRoute>
+      {" "}
+      <Layout />
+    </ProtectedRoute>
+    ), // Layout이 Home, Profile을 감싸기 때문에 Home/Profile에 따로 <ProtectedRaoute>안해도 적용됨
     children: [
       {
-        path: "", 
+        path: "",
         element: <Home />,
       },
       {
         path: "profile",
         element: <Profile />,
       },
-    ]
-  },  
+    ],
+  },
   // login, creat-account가 Layout에 안들어가게 
   {
     path: "/login",
@@ -37,7 +42,7 @@ const router = createBrowserRouter([
     path: "/create-account",
     element: <CreateAccount />
   }
-  
+
 ]);
 
 const GlobalStyles = createGlobalStyle`
@@ -59,24 +64,23 @@ const Wrapper = styled.div`
   justify-content: center;
 `;
 
-
+// App 초기화
 function App() {
   // firebase가 유저 체크하는 동안 띄울 로딩화면
   const [isLoading, setLoading] = useState(true);
-  const init = async() => {
-    await auth.authStateReady();
-    // authStateReady() -> firebase가 유저 체크하는 동안 기다림
+  const init = async () => {
+    await auth.authStateReady(); // Firebase 인증 상태 확인 대기
     setLoading(false);
   };
   useEffect(() => {
     init();
   }, []);
   return (
-  <Wrapper>
-    <GlobalStyles />
-    {isLoading ? <LoadingScreen /> : <RouterProvider router ={router} />} 
-    {/* isLoading true -> <LoadingScreen /> 실행, false -> <RouterProvider /> */}
-  </Wrapper>
+    <Wrapper>
+      <GlobalStyles />
+      {isLoading ? <LoadingScreen /> : <RouterProvider router={router} />}
+      {/* isLoading true -> <LoadingScreen /> 실행, false -> <RouterProvider /> */}
+    </Wrapper>
   );
 }
 
