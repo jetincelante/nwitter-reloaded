@@ -1,45 +1,10 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
-import styled from "styled-components"
 import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
+import { Error, Form, Input, Switcher, Title, Wrapper } from "../components/auth-components";
 
-const Wrapper = styled.div`
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 420px;
-    padding: 50px 0px;
-`;
-const Title = styled.h1`
-    font-size: 42px;
-`;
-const Form = styled.form`
-    margin-top: 50px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-`;
-const Input = styled.input`
-    padding: 10px 20px; // padding: [상하] [좌우];
-    border-radius: 50px;
-    border: none;
-    width: 100%;
-    font-size: 16px;
-     &[type="submit"]{
-     cursor: pointer;
-     &:hover{
-        opacity: 0.8; // 투명도 
-        }
-    }
-`;
-
-const Error = styled.span`
-    font-weight: 600;
-    color: tomato;
-`;
 export default function CreateAccount() {
     const navigate = useNavigate();
     const [isLoading, setLoading] = useState(false);
@@ -74,9 +39,11 @@ export default function CreateAccount() {
         // <HTMLFormElement>: 이 이벤트가 <form> 태그에서 발생함
         // async : await 사용 위한 비동기 
         e.preventDefault();
-        // 브라우저 기본 동작(새로고침) 중단시키는 메소드
-        // 가입 누르면 실행 -> 새로고침 없이 자바스크립트(console.log)가 데이터 처리하도록
+        // 브라우저의 기본 동작(새로고침) 중단 메소드
+        // 가입 누르면 실행 -> 새로고침 없이 자바스크립트(console.log)가 데이터 처리하게
+        setError("");
         if (isLoading || name === "" || email === "" || password === "") return;
+        // 위 조건 중 하나라도 참 -> 함수 종료
         try {
             setLoading(true); // 로딩 시작
             const credentials = await createUserWithEmailAndPassword(
@@ -92,7 +59,9 @@ export default function CreateAccount() {
             });
             navigate("/"); // 계정 생성, 사용자 프로필 업데이트 후 홈 화면으로
         } catch (e) {
-            // setError
+            if (e instanceof FirebaseError) {
+                setError(e.message);
+            }
         } finally {
             setLoading(false);
         }
@@ -134,6 +103,10 @@ export default function CreateAccount() {
             </Form>
             {error !== "" ? <Error>{error}</Error> : null}
             {/* 조건부 렌더링: 에러가 안 비었을 때 <Error> 태그를 화면에 그림 */}
+            <Switcher>
+                Already have an account?{""}
+                <Link to="/login">log in &rarr;</Link>
+            </Switcher>
         </Wrapper>
     );
 }
